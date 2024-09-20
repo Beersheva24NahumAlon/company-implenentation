@@ -41,18 +41,17 @@ public class CompanyImpl implements Company {
         if (getEmployee(empl.getId()) != null) {
             throw new IllegalStateException();
         }
-        
         employees.put(empl.getId(), empl);
         
         String department = empl.getDepartment();
-        List<Employee> listEmployees = employeesDepartment.getOrDefault(department, new ArrayList<>());
+        List<Employee> listEmployees = employeesDepartment.getOrDefault(department, new LinkedList<>());
         listEmployees.add(empl);
         employeesDepartment.put(empl.getDepartment(), listEmployees);
 
         if (empl instanceof Manager) {
             Manager manager = (Manager) empl;
             Float factor = manager.getFactor();
-            List<Manager> listManagers = managers.getOrDefault(factor, new ArrayList<>());
+            List<Manager> listManagers = managers.getOrDefault(factor, new LinkedList<>());
             listManagers.add(manager);
             managers.put(factor, listManagers);
         }
@@ -88,8 +87,7 @@ public class CompanyImpl implements Company {
                 managers.remove(factor);
             }
         }
-        employees.remove(empl.getId());
-        return empl;
+        return employees.remove(empl.getId());
     }
 
     @Override
