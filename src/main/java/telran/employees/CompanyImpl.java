@@ -27,7 +27,8 @@ public class CompanyImpl implements Company {
         @Override
         public void remove() {
             it.remove();
-            removeEmployee(iteratedObj);
+            removeEmployeeFromDepartment(iteratedObj);
+            removeManagerFromManagers(iteratedObj);
         }
     }
 
@@ -38,22 +39,23 @@ public class CompanyImpl implements Company {
 
     @Override
     public void addEmployee(Employee empl) {
-        if (getEmployee(empl.getId()) != null) {
+        Long id = empl.getId();
+        if (getEmployee(id) != null) {
             throw new IllegalStateException();
         }
-        employees.put(empl.getId(), empl);
-        
-        String department = empl.getDepartment();
-        List<Employee> listEmployees = employeesDepartment.getOrDefault(department, new LinkedList<>());
-        listEmployees.add(empl);
-        employeesDepartment.put(empl.getDepartment(), listEmployees);
+        employees.put(id, empl);
+        addEmployeeToDepartment(empl);
+        addEmployeeToManagers(empl);
+    }
 
+    private void addEmployeeToDepartment(Employee empl) {
+        employeesDepartment.computeIfAbsent(empl.getDepartment(), k -> new LinkedList<>()).add(empl);
+    }
+
+    private void addEmployeeToManagers(Employee empl) {
         if (empl instanceof Manager) {
             Manager manager = (Manager) empl;
-            Float factor = manager.getFactor();
-            List<Manager> listManagers = managers.getOrDefault(factor, new LinkedList<>());
-            listManagers.add(manager);
-            managers.put(factor, listManagers);
+            managers.computeIfAbsent(manager.getFactor(), k -> new LinkedList<>()).add(manager);
         }
     }
 
@@ -64,20 +66,25 @@ public class CompanyImpl implements Company {
 
     @Override
     public Employee removeEmployee(long id) {
-        if (getEmployee(id) == null) {
+        Employee empl = employees.get(id);
+        if (empl == null) {
             throw new NoSuchElementException();
         }
-        Employee empl = employees.get(id);
-        return removeEmployee(empl);
+        removeEmployeeFromDepartment(empl);
+        removeManagerFromManagers(empl);
+        return employees.remove(id);
     }
 
-    private Employee removeEmployee(Employee empl) {
+    private void removeEmployeeFromDepartment(Employee empl) {
         String department = empl.getDepartment();
         List<Employee> listEmployees = employeesDepartment.get(department);
         listEmployees.remove(empl);
         if (listEmployees.isEmpty()) {
             employeesDepartment.remove(department);
         }
+    }
+
+    private void removeManagerFromManagers(Employee empl) {
         if (empl instanceof Manager) {
             Manager manager = (Manager) empl;
             Float factor = manager.getFactor();
@@ -87,7 +94,6 @@ public class CompanyImpl implements Company {
                 managers.remove(factor);
             }
         }
-        return employees.remove(empl.getId());
     }
 
     @Override
