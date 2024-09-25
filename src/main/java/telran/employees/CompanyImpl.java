@@ -76,23 +76,21 @@ public class CompanyImpl implements Company {
     }
 
     private void removeEmployeeFromDepartment(Employee empl) {
-        String department = empl.getDepartment();
-        List<Employee> listEmployees = employeesDepartment.get(department);
-        listEmployees.remove(empl);
-        if (listEmployees.isEmpty()) {
-            employeesDepartment.remove(department);
-        }
+        removeFromMapsOfLists(employeesDepartment, empl, empl.getDepartment());
     }
 
     private void removeManagerFromManagers(Employee empl) {
         if (empl instanceof Manager) {
             Manager manager = (Manager) empl;
-            Float factor = manager.getFactor();
-            List<Manager> listManagers = managers.get(factor);
-            listManagers.remove(manager);
-            if (listManagers.isEmpty()) {
-                managers.remove(factor);
-            }
+            removeFromMapsOfLists(managers, manager, manager.getFactor());
+        }
+    }
+
+    private <K, E extends Employee> void removeFromMapsOfLists(Map<K, List<E>> map, Employee empl, K key) {
+        List<E> list = map.get(key);
+        list.remove(empl);
+        if (list.isEmpty()) {
+            map.remove(key);
         }
     }
 
