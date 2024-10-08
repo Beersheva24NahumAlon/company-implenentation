@@ -3,8 +3,11 @@ package telran.employees;
 import java.util.*;
 import java.util.Map.Entry;
 import java.lang.IllegalStateException;
+import telran.io.Persistable;
+import java.io.*;
+import java.util.stream.*;
 
-public class CompanyImpl implements Company {
+public class CompanyImpl implements Company, Persistable {
     private TreeMap<Long, Employee> employees = new TreeMap<>();
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managers = new TreeMap<>();
@@ -117,5 +120,19 @@ public class CompanyImpl implements Company {
             res = mostFactorEntry.getValue().stream().toArray(Manager[]::new);
         }
         return res;
+    }
+
+    @Override
+    public void saveToFile(String fileName) throws Exception{
+        PrintWriter writer = new PrintWriter(fileName);
+        StreamSupport.stream(spliterator(), false).forEach(e -> writer.println(e.toString())); 
+        writer.close();      
+    }
+
+    @Override
+    public void restoreFromFile(String fileName) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        reader.lines().forEach(l -> addEmployee(Employee.getEmployeeFromJSON(l)));
+        reader.close();
     }
 }

@@ -9,6 +9,8 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import telran.io.Persistable;
+
 //import telran.employees.*;
 //import telran.io.Persistable;
 
@@ -78,6 +80,10 @@ public class CompanyTest {
 
 	@Test
 	void testIterator() {
+		runIteratorTest(company);
+	}
+
+	private void runIteratorTest(Company company) {
 		Employee[] expected = { empl2, empl1, empl3 };
 		Iterator<Employee> it = company.iterator();
 		int index = 0;
@@ -138,4 +144,23 @@ public class CompanyTest {
 		assertArrayEquals(new String[] { DEPARTMENT1 }, company.getDepartments());
 	}
 
+	@Test
+	void jsonTest() {
+		Employee mgrFromJSON = Employee.getEmployeeFromJSON("{\"basicSalary\":1000,\"className\":\"telran.employees.Manager\",\"id\":123,\"department\":\"QA\",\"factor\":1}");
+		Employee mgrExpected = new Manager(ID1, SALARY1, DEPARTMENT1, FACTOR1);
+		System.out.println(mgrFromJSON);
+		System.out.println(mgrExpected);
+		assertEquals(mgrFromJSON, mgrExpected);
+	}
+
+	@Test
+	void persistenceTest() throws Exception {
+		if (company instanceof Persistable persCompany) {
+			persCompany.saveToFile("company.data");
+			CompanyImpl comp = new CompanyImpl();
+			comp.restoreFromFile("company.data");
+			runIteratorTest(comp);
+		}
+	}
+	
 }
