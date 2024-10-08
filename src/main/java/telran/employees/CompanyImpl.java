@@ -123,16 +123,27 @@ public class CompanyImpl implements Company, Persistable {
     }
 
     @Override
-    public void saveToFile(String fileName) throws Exception{
-        PrintWriter writer = new PrintWriter(fileName);
-        StreamSupport.stream(spliterator(), false).forEach(e -> writer.println(e.toString())); 
-        writer.close();      
+    public void saveToFile(String fileName) {
+        try {
+            PrintWriter writer = new PrintWriter(fileName);
+            StreamSupport.stream(spliterator(), false).forEach(e -> writer.println(e.toString())); 
+            writer.close(); 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+     
     }
 
     @Override
-    public void restoreFromFile(String fileName) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        reader.lines().forEach(l -> addEmployee(Employee.getEmployeeFromJSON(l)));
-        reader.close();
+    public void restoreFromFile(String fileName) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            reader.lines().forEach(l -> addEmployee(Employee.getEmployeeFromJSON(l)));
+            reader.close();
+        } catch (FileNotFoundException e) {
+            
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
