@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 import java.lang.IllegalStateException;
 import telran.io.Persistable;
 import java.io.*;
-import java.util.stream.*;
 
 public class CompanyImpl implements Company, Persistable {
     private TreeMap<Long, Employee> employees = new TreeMap<>();
@@ -124,24 +123,18 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public void saveToFile(String fileName) {
-        try {
-            PrintWriter writer = new PrintWriter(fileName);
-            StreamSupport.stream(spliterator(), false).forEach(e -> writer.println(e.toString())); 
-            writer.close(); 
+        try (PrintWriter writer = new PrintWriter(fileName)) {
+            iterator().forEachRemaining(writer::println);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-     
     }
 
     @Override
     public void restoreFromFile(String fileName) {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             reader.lines().forEach(l -> addEmployee(Employee.getEmployeeFromJSON(l)));
-            reader.close();
-        } catch (FileNotFoundException e) {
-            
+        } catch (FileNotFoundException e) { 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
