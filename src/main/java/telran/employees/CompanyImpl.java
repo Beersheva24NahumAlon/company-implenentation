@@ -124,7 +124,7 @@ public class CompanyImpl implements Company, Persistable {
     @Override
     public void saveToFile(String fileName) {
         try (PrintWriter writer = new PrintWriter(fileName)) {
-            iterator().forEachRemaining(writer::println);
+            forEach(writer::println);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
