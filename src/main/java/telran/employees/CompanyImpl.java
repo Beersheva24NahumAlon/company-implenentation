@@ -43,7 +43,7 @@ public class CompanyImpl implements Company, Persistable {
     public void addEmployee(Employee empl) {
         Long id = empl.getId();
         if (getEmployee(id) != null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("The employee with this id is already exist in th compamy");
         }
         employees.put(id, empl);
         addEmployeeToDepartment(empl);
@@ -70,7 +70,7 @@ public class CompanyImpl implements Company, Persistable {
     public Employee removeEmployee(long id) {
         Employee empl = employees.get(id);
         if (empl == null) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("The employee with this id is not exist in the compamy");
         }
         removeEmployeeFromDepartment(empl);
         removeManagerFromManagers(empl);
