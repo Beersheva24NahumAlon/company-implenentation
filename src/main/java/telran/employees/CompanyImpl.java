@@ -10,6 +10,7 @@ public class CompanyImpl implements Company, Persistable {
     private TreeMap<Long, Employee> employees = new TreeMap<>();
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managers = new TreeMap<>();
+    private boolean changes = false;
 
     public class IteratorCompany implements Iterator<Employee>{
         Iterator<Employee> it = employees.values().iterator();
@@ -31,6 +32,7 @@ public class CompanyImpl implements Company, Persistable {
             it.remove();
             removeEmployeeFromDepartment(iteratedObj);
             removeManagerFromManagers(iteratedObj);
+            changes = true;
         }
     }
 
@@ -48,6 +50,7 @@ public class CompanyImpl implements Company, Persistable {
         employees.put(id, empl);
         addEmployeeToDepartment(empl);
         addEmployeeToManagers(empl);
+        changes = true;
     }
 
     @SuppressWarnings("unused")
@@ -76,6 +79,7 @@ public class CompanyImpl implements Company, Persistable {
         }
         removeEmployeeFromDepartment(empl);
         removeManagerFromManagers(empl);
+        changes = true;
         return employees.remove(id);
     }
 
@@ -140,5 +144,12 @@ public class CompanyImpl implements Company, Persistable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override 
+    public boolean checkChanges() {
+        boolean res = changes;
+        changes = false;
+        return res;
     }
 }

@@ -13,4 +13,6 @@ public interface Company extends Iterable<Employee> {
 
 	public Manager[] getManagersWithMostFactor();
 
+	public boolean checkChanges();
+
 }
