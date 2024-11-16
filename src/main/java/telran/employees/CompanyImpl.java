@@ -50,10 +50,12 @@ public class CompanyImpl implements Company, Persistable {
         addEmployeeToManagers(empl);
     }
 
+    @SuppressWarnings("unused")
     private void addEmployeeToDepartment(Employee empl) {
         employeesDepartment.computeIfAbsent(empl.getDepartment(), k -> new LinkedList<>()).add(empl);
     }
 
+    @SuppressWarnings("unused")
     private void addEmployeeToManagers(Employee empl) {
         if (empl instanceof Manager) {
             Manager manager = (Manager) empl;
