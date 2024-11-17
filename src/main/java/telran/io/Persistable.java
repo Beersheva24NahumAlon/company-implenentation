@@ -1,7 +1,7 @@
 package telran.io;
 
 public interface Persistable {
-    void saveToFile(String fileName);
+    boolean saveToFile(String fileName);
 
     void restoreFromFile(String fileName);
 }

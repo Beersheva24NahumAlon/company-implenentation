@@ -10,7 +10,7 @@ public class CompanyImpl implements Company, Persistable {
     private TreeMap<Long, Employee> employees = new TreeMap<>();
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managers = new TreeMap<>();
-    private boolean changes = false;
+    private boolean stateChanged = false;
 
     public class IteratorCompany implements Iterator<Employee>{
         Iterator<Employee> it = employees.values().iterator();
@@ -32,7 +32,7 @@ public class CompanyImpl implements Company, Persistable {
             it.remove();
             removeEmployeeFromDepartment(iteratedObj);
             removeManagerFromManagers(iteratedObj);
-            changes = true;
+            stateChanged = true;
         }
     }
 
@@ -50,7 +50,7 @@ public class CompanyImpl implements Company, Persistable {
         employees.put(id, empl);
         addEmployeeToDepartment(empl);
         addEmployeeToManagers(empl);
-        changes = true;
+        stateChanged = true;
     }
 
     @SuppressWarnings("unused")
@@ -79,7 +79,7 @@ public class CompanyImpl implements Company, Persistable {
         }
         removeEmployeeFromDepartment(empl);
         removeManagerFromManagers(empl);
-        changes = true;
+        stateChanged = true;
         return employees.remove(id);
     }
 
@@ -128,12 +128,18 @@ public class CompanyImpl implements Company, Persistable {
     }
 
     @Override
-    public void saveToFile(String fileName) {
-        try (PrintWriter writer = new PrintWriter(fileName)) {
-            forEach(writer::println);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public boolean saveToFile(String fileName) {
+        boolean res = false;
+        if (stateChanged) {
+            try (PrintWriter writer = new PrintWriter(fileName)) {
+                forEach(writer::println);
+                stateChanged = false;
+                res = true;        
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        return res;
     }
 
     @Override
@@ -144,12 +150,5 @@ public class CompanyImpl implements Company, Persistable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override 
-    public boolean checkChanges() {
-        boolean res = changes;
-        changes = false;
-        return res;
     }
 }
