@@ -2,6 +2,8 @@ package telran.employees;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.lang.IllegalStateException;
 import telran.io.Persistable;
 import java.io.*;
@@ -11,6 +13,9 @@ public class CompanyImpl implements Company, Persistable {
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managers = new TreeMap<>();
     private boolean stateChanged = false;
+    private static ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private static Lock readLock = readWriteLock.readLock();
+    private static Lock writeLock = readWriteLock.writeLock();
 
     public class IteratorCompany implements Iterator<Employee>{
         Iterator<Employee> it = employees.values().iterator();
@@ -18,21 +23,36 @@ public class CompanyImpl implements Company, Persistable {
 
         @Override
         public boolean hasNext() {
-            return it.hasNext();
+            try {
+                readLock.lock();
+                return it.hasNext();
+            } finally {
+                readLock.unlock();
+            }   
         }
 
         @Override
         public Employee next() {
-            iteratedObj = it.next();
-            return iteratedObj;
+            try {
+                readLock.lock();
+                iteratedObj = it.next();
+                return iteratedObj;
+            } finally {
+                readLock.unlock();
+            }   
         }
 
         @Override
         public void remove() {
-            it.remove();
-            removeEmployeeFromDepartment(iteratedObj);
-            removeManagerFromManagers(iteratedObj);
-            stateChanged = true;
+            try {
+                writeLock.lock();
+                it.remove();
+                removeEmployeeFromDepartment(iteratedObj);
+                removeManagerFromManagers(iteratedObj);
+                stateChanged = true;
+            } finally {
+                writeLock.unlock();
+            }
         }
     }
 
@@ -47,10 +67,15 @@ public class CompanyImpl implements Company, Persistable {
         if (getEmployee(id) != null) {
             throw new IllegalStateException("The employee with this id is already exist in th compamy");
         }
-        employees.put(id, empl);
-        addEmployeeToDepartment(empl);
-        addEmployeeToManagers(empl);
-        stateChanged = true;
+        try {
+            writeLock.lock();
+            employees.put(id, empl);
+            addEmployeeToDepartment(empl);
+            addEmployeeToManagers(empl);
+            stateChanged = true;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @SuppressWarnings("unused")
@@ -68,7 +93,12 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public Employee getEmployee(long id) {
-        return employees.get(id);
+        try {
+            readLock.lock();
+            return employees.get(id);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
@@ -77,10 +107,15 @@ public class CompanyImpl implements Company, Persistable {
         if (empl == null) {
             throw new NoSuchElementException("The employee with this id is not exist in the compamy");
         }
-        removeEmployeeFromDepartment(empl);
-        removeManagerFromManagers(empl);
-        stateChanged = true;
-        return employees.remove(id);
+        try {
+            writeLock.lock();
+            removeEmployeeFromDepartment(empl);
+            removeManagerFromManagers(empl);
+            stateChanged = true;
+            return employees.remove(id);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private void removeEmployeeFromDepartment(Employee empl) {
@@ -103,28 +138,44 @@ public class CompanyImpl implements Company, Persistable {
     }
 
     @Override
-    public int getDepartmentBudget(String department) {
-        int budget = 0;
-        List<Employee> listEmployees = employeesDepartment.get(department);
-        if (listEmployees != null) {
-            budget = listEmployees.stream().mapToInt(e -> e.computeSalary()).sum();
+    public int getDepartmentBudget(String department) { 
+        try {
+            readLock.lock();
+            int budget = 0;
+            List<Employee> listEmployees = employeesDepartment.get(department);
+            if (listEmployees != null) {
+                budget = listEmployees.stream().mapToInt(e -> e.computeSalary()).sum();
+            }
+            return budget;
+        } finally {
+            readLock.unlock();
         }
-        return budget;
     }
 
     @Override
     public String[] getDepartments() {
-        return employeesDepartment.keySet().stream().sorted().toArray(String[]::new);
+        try {
+            readLock.lock();
+            return employeesDepartment.keySet().stream().sorted().toArray(String[]::new);
+        } finally {
+            readLock.unlock();
+        }   
     }
 
     @Override
     public Manager[] getManagersWithMostFactor() {
-        Entry<Float, List<Manager>> mostFactorEntry = managers.lastEntry();
-        Manager[] res = {};
-        if (mostFactorEntry != null) {
-            res = mostFactorEntry.getValue().stream().toArray(Manager[]::new);
+        try {
+            readLock.lock();
+            Entry<Float, List<Manager>> mostFactorEntry = managers.lastEntry();
+            Manager[] res = {};
+            if (mostFactorEntry != null) {
+                res = mostFactorEntry.getValue().stream().toArray(Manager[]::new);
+            }
+            return res;
+        } finally {
+            readLock.unlock();
         }
-        return res;
+
     }
 
     @Override
