@@ -23,36 +23,21 @@ public class CompanyImpl implements Company, Persistable {
 
         @Override
         public boolean hasNext() {
-            try {
-                readLock.lock();
-                return it.hasNext();
-            } finally {
-                readLock.unlock();
-            }   
+            return it.hasNext();   
         }
 
         @Override
         public Employee next() {
-            try {
-                readLock.lock();
-                iteratedObj = it.next();
-                return iteratedObj;
-            } finally {
-                readLock.unlock();
-            }   
+            iteratedObj = it.next();
+            return iteratedObj;   
         }
 
         @Override
         public void remove() {
-            try {
-                writeLock.lock();
-                it.remove();
-                removeEmployeeFromDepartment(iteratedObj);
-                removeManagerFromManagers(iteratedObj);
-                stateChanged = true;
-            } finally {
-                writeLock.unlock();
-            }
+            it.remove();
+            removeEmployeeFromDepartment(iteratedObj);
+            removeManagerFromManagers(iteratedObj);
+            stateChanged = true;
         }
     }
 
@@ -63,12 +48,12 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public void addEmployee(Employee empl) {
-        Long id = empl.getId();
-        if (getEmployee(id) != null) {
-            throw new IllegalStateException("The employee with this id is already exist in th compamy");
-        }
         try {
             writeLock.lock();
+            Long id = empl.getId();
+            if (getEmployee(id) != null) {
+                throw new IllegalStateException("The employee with this id is already exist in th compamy");
+            }
             employees.put(id, empl);
             addEmployeeToDepartment(empl);
             addEmployeeToManagers(empl);
@@ -103,12 +88,12 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public Employee removeEmployee(long id) {
-        Employee empl = employees.get(id);
-        if (empl == null) {
-            throw new NoSuchElementException("The employee with this id is not exist in the compamy");
-        }
         try {
             writeLock.lock();
+            Employee empl = employees.get(id);
+            if (empl == null) {
+                throw new NoSuchElementException("The employee with this id is not exist in the compamy");
+            }
             removeEmployeeFromDepartment(empl);
             removeManagerFromManagers(empl);
             stateChanged = true;
@@ -180,17 +165,22 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public boolean saveToFile(String fileName) {
-        boolean res = false;
-        if (stateChanged) {
-            try (PrintWriter writer = new PrintWriter(fileName)) {
-                forEach(writer::println);
-                stateChanged = false;
-                res = true;        
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        try {
+            readLock.lock();
+            boolean res = false;
+            if (stateChanged) {
+                try (PrintWriter writer = new PrintWriter(fileName)) {
+                    forEach(writer::println);
+                    stateChanged = false;
+                    res = true;        
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
+            return res;
+        } finally {
+            readLock.unlock();
         }
-        return res;
     }
 
     @Override
