@@ -13,9 +13,9 @@ public class CompanyImpl implements Company, Persistable {
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managers = new TreeMap<>();
     private boolean stateChanged = false;
-    private static ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private static Lock readLock = readWriteLock.readLock();
-    private static Lock writeLock = readWriteLock.writeLock();
+    private ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private Lock readLock = readWriteLock.readLock();
+    private Lock writeLock = readWriteLock.writeLock();
 
     public class IteratorCompany implements Iterator<Employee>{
         Iterator<Employee> it = employees.values().iterator();
