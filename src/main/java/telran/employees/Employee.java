@@ -36,6 +36,10 @@ public class Employee {
         this.department = department;
     }
 
+    public int getBasicSalary() {
+        return basicSalary;
+    }
+
     public int computeSalary() {
         return basicSalary;
     }
