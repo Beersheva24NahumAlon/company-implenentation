@@ -7,6 +7,8 @@ import telran.employees.*;
 @Table(name = "employees")
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type")
+@DiscriminatorValue("Employee")
 public class EmployeeEntity {
     @Id
     private long id;

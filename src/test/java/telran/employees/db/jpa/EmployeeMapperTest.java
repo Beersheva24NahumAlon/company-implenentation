@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import telran.employees.*;
 
-public class JpaTest {
+public class EmployeeMapperTest {
     Employee employee = new Employee(1000, 10000, "QA");
     Employee manager = new Manager(1001, 12000, "QA", 1.6f);
     Employee wageEmployee = new WageEmployee(1002, 13000, "QA", 100, 50);

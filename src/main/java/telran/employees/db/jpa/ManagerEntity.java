@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import telran.employees.*;
 
 @Entity
+@DiscriminatorValue("Manager")
 public class ManagerEntity extends EmployeeEntity {
     private float factor;
 

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import telran.employees.*;
 
 @Entity
+@DiscriminatorValue("WageEmployee")
 public class WageEmployeeEntity extends EmployeeEntity {
     private int wage;
     private int hours;
