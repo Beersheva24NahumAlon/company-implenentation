@@ -97,4 +97,11 @@ public class CompanyRepositoryJpaImpl implements CompanyRepository {
         return query.getResultList();
     }
 
+    @Override
+    public List<Manager> findManagersWithMaxFactor() {
+        TypedQuery<ManagerEntity> query = em.createQuery("select mgr from ManagerEntity mgr where factor=(select max(factor) from ManagerEntity)", 
+                ManagerEntity.class);
+        List<ManagerEntity> managers = query.getResultList();
+        return managers.stream().map(EmployeesMapper::toEmployeeDtoFromEntity).map(e -> (Manager) e).toList();
+    }
 }

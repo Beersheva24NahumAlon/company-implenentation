@@ -1,8 +1,6 @@
 package telran.employees.db;
 
-import java.util.Iterator;
-import java.util.List;
-
+import java.util.*;
 import telran.employees.*;
 
 public class CompanyDBImpl implements Company {
@@ -12,9 +10,32 @@ public class CompanyDBImpl implements Company {
         this.repository = repository;
     }
 
+    private class CompanyDBIterator implements Iterator<Employee>{
+        Iterator<Employee> it = new ArrayList<>(repository.getAllEmployees()).iterator();
+        Employee prev;
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Employee next() {
+            prev = it.next();
+            return prev;
+        }
+
+        @Override
+        public void remove() {
+            it.remove();
+            removeEmployee(prev.getId());
+        }
+
+    }
+
     @Override
     public Iterator<Employee> iterator() {
-        return repository.getAllEmployees().iterator();
+        return new CompanyDBIterator();
     }
 
     @Override
@@ -46,8 +67,7 @@ public class CompanyDBImpl implements Company {
 
     @Override
     public Manager[] getManagersWithMostFactor() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getManagersWithMostFactor'");
+        List<Manager> employees = repository.findManagersWithMaxFactor();
+        return employees.toArray(Manager[]::new);
     }
-
 }

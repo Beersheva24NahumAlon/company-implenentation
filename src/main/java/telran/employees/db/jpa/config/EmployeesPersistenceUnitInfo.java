@@ -39,7 +39,11 @@ public class EmployeesPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public DataSource getNonJtaDataSource() {
         HikariDataSource ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:postgresql://%s:%s/postgres".formatted(System.getenv("POSTGRES_HOST"), System.getenv("POSTGRES_PORT")));
+		ds.setJdbcUrl("jdbc:postgresql://%s:%s/%s".formatted(
+            System.getenv("POSTGRES_HOST"), 
+            System.getenv("POSTGRES_PORT"),
+            System.getenv("POSTGRES_DB")
+        ));
 		ds.setPassword(System.getenv("POSTGRES_PASSWORD"));
 		ds.setUsername("postgres");
 		ds.setDriverClassName("org.postgresql.Driver");
@@ -110,6 +114,7 @@ public class EmployeesPersistenceUnitInfo implements PersistenceUnitInfo {
         return null;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public PersistenceUnitTransactionType getTransactionType() {
         return null;
