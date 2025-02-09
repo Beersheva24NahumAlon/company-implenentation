@@ -146,7 +146,7 @@ public class CompanyTest {
 
 	@Test
 	void jsonTest() {
-		Employee mgrFromJSON = Employee.getEmployeeFromJSON("{\"basicSalary\":1000,\"className\":\"telran.employees.Manager\",\"id\":123,\"department\":\"QA\",\"factor\":1}");
+		Employee mgrFromJSON = Employee.getEmployeeFromJSON("{\"basicSalary\":1000,\"className\":\"Manager\",\"id\":123,\"department\":\"QA\",\"factor\":1}");
 		Employee mgrExpected = new Manager(ID1, SALARY1, DEPARTMENT1, FACTOR1);
 		System.out.println(mgrFromJSON);
 		System.out.println(mgrExpected);
